@@ -28,6 +28,8 @@ process NANOPLOT {
     NanoPlot \\
         $args \\
         -t $task.cpus \\
+        -p $meta.id \\
+        --tsv_stats \\
         $input_file
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
