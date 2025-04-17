@@ -1,5 +1,5 @@
 name: nanoplot
-description: Run NanoPlot on nanopore-sequenced reads
+description: Run NanoPlot on nanopore-sequenced reads and generate plots
 keywords:
   - quality control
   - qc
