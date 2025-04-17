@@ -388,18 +388,11 @@ workflow NANOSEQ{
             ch_featurecounts_gene_multiqc       = QUANTIFY_STRINGTIE_FEATURECOUNTS.out.featurecounts_gene_multiqc.ifEmpty([])
             ch_featurecounts_transcript_multiqc = QUANTIFY_STRINGTIE_FEATURECOUNTS.out.featurecounts_transcript_multiqc.ifEmpty([])
         }
-
-        ch_view_sortbam.subscribe { item -> println "ch_view_sortbam: $item" }
-
-        ch_view_sortbam
-            .join( BEDTOOLS_UCSC_BIGBED.out.ch_bed12 )           
-            .map { it -> [ it[3], it[4], it[6] ] }
-            .set { ch_rseqc }
-
-        ch_rseqc.subscribe { item -> println "ch_rseqc: $item" }
         
         RSEQC_GENEBODYCOVERAGE (
-            ch_rseqc
+            ch_view_sortbam
+                .join( BEDTOOLS_UCSC_BIGBED.out.ch_bed12 )           
+                .map { it -> [ it[3], it[4], it[6] ] }
             )
 
         if (!params.skip_differential_analysis) {
