@@ -26,6 +26,7 @@ workflow BEDTOOLS_UCSC_BIGBED {
 
     emit:
     bedtools_version
+    ch_bed12
     ch_bigbed
     bed12tobigbed_version
 }

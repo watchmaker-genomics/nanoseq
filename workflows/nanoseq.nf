@@ -105,6 +105,7 @@ include { GET_NANOLYSE_FASTA    } from '../modules/local/get_nanolyse_fasta'
 include { QCAT                  } from '../modules/local/qcat'
 include { BAM_RENAME            } from '../modules/local/bam_rename'
 include { BAMBU                 } from '../modules/local/bambu'
+include { RSEQC_GENEBODYCOVERAGE} from '../modules/local/rseqc_genebodycoverage'
 include { MULTIQC               } from '../modules/local/multiqc'
 
 /*
@@ -387,6 +388,13 @@ workflow NANOSEQ{
             ch_featurecounts_gene_multiqc       = QUANTIFY_STRINGTIE_FEATURECOUNTS.out.featurecounts_gene_multiqc.ifEmpty([])
             ch_featurecounts_transcript_multiqc = QUANTIFY_STRINGTIE_FEATURECOUNTS.out.featurecounts_transcript_multiqc.ifEmpty([])
         }
+        
+        RSEQC_GENEBODYCOVERAGE (
+            ch_view_sortbam
+                .join( BEDTOOLS_UCSC_BIGBED.out.ch_bed12 )           
+                .map { it -> [ it[3], it[4], it[6] ] }
+            )
+
         if (!params.skip_differential_analysis) {
 
             /*
