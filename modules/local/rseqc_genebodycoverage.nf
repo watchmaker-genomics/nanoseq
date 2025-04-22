@@ -1,6 +1,6 @@
 process RSEQC_GENEBODYCOVERAGE {
     label 'process_high'
-    container "quay.io/biocontainers/rseqc:3.0.1--py37h516909a_1"
+    container "912684371407.dkr.ecr.us-west-2.amazonaws.com/quay.io/biocontainers/rseqc:3.0.1--py37h516909a_1"
 
     input:
     tuple path(bam), path(bai), path(bed12)
