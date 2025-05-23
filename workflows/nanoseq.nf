@@ -221,29 +221,20 @@ workflow NANOSEQ{
     // check if we need to do downsampling on ch_fastq if so then do it and update
 
     if (params.downsample_depth) {
-        /*
-         * MODULE: Downsample fastq files using seqtk
-         */
+
          ch_fastq
             .map { it -> [ it[0], it[1], params.downsample_depth ] }
             .set { ch_for_seqtk }
-        }
 
         SEQTK_SAMPLE( ch_for_seqtk )
         ch_software_versions = ch_software_versions.mix(SEQTK_SAMPLE.out.versions)
 
         SEQTK_SAMPLE.out.reads.join(ch_fastq).set{ joined_seqtk}
 
-        // meta, new_reads, barcode, fasta, gtf
-
         joined_seqtk
             .map { it -> [ it[0], it[1], it[3], it[4], it[5], it[6] ] }
             .set { ch_fastq }
-
-
-    // step one use a map call to filter down the params to just meta and fastq
-    // step two Running seqtk on the the filtered channel
-    // step three Join the downsampled fastq with the old fastq channel and creat a output channel that the tools expect
+    }
 
     if (params.run_nanolyse) {
         ch_fastq
@@ -422,10 +413,10 @@ workflow NANOSEQ{
             ch_featurecounts_gene_multiqc       = QUANTIFY_STRINGTIE_FEATURECOUNTS.out.featurecounts_gene_multiqc.ifEmpty([])
             ch_featurecounts_transcript_multiqc = QUANTIFY_STRINGTIE_FEATURECOUNTS.out.featurecounts_transcript_multiqc.ifEmpty([])
         }
-        
+
         RSEQC_GENEBODYCOVERAGE (
             ch_view_sortbam
-                .join( BEDTOOLS_UCSC_BIGBED.out.ch_bed12 )           
+                .join( BEDTOOLS_UCSC_BIGBED.out.ch_bed12 )
                 .map { it -> [ it[3], it[4], it[6] ] }
             )
 
