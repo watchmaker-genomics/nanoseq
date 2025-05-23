@@ -89,6 +89,12 @@ if (!params.skip_quantification) {
     }
 }
 
+if (params.downsample_depth) {
+    if (params.downsample_depth < 1 ) {
+        exit 1, "Invalid downsampling value: ${params.downsample_depth}. Must be greater than 0."
+    }
+}
+
 ////////////////////////////////////////////////////
 /* --          CONFIG FILES                    -- */
 ////////////////////////////////////////////////////
@@ -111,6 +117,7 @@ include { MULTIQC               } from '../modules/local/multiqc'
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
  */
+
 
 include { INPUT_CHECK                      } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME                   } from '../subworkflows/local/prepare_genome'
@@ -135,6 +142,7 @@ include { RNA_FUSIONS_JAFFAL               } from '../subworkflows/local/rna_fus
  * MODULE: Installed directly from nf-core/modules
  */
 include { NANOLYSE                    } from '../modules/nf-core/nanolyse/main'
+include { SEQTK_SAMPLE                } from '../modules/nf-core/seqtk/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
@@ -210,6 +218,32 @@ workflow NANOSEQ{
             ch_fastq = Channel.empty()
         }
     }
+    // check if we need to do downsampling on ch_fastq if so then do it and update
+
+    if (params.downsample_depth) {
+        /*
+         * MODULE: Downsample fastq files using seqtk
+         */
+         ch_fastq
+            .map { it -> [ it[0], it[1], params.downsample_depth ] }
+            .set { ch_for_seqtk }
+        }
+
+        SEQTK_SAMPLE( ch_for_seqtk )
+        ch_software_versions = ch_software_versions.mix(SEQTK_SAMPLE.out.versions)
+
+        SEQTK_SAMPLE.out.reads.join(ch_fastq).set{ joined_seqtk}
+
+        // meta, new_reads, barcode, fasta, gtf
+
+        joined_seqtk
+            .map { it -> [ it[0], it[1], it[3], it[4], it[5], it[6] ] }
+            .set { ch_fastq }
+
+
+    // step one use a map call to filter down the params to just meta and fastq
+    // step two Running seqtk on the the filtered channel
+    // step three Join the downsampled fastq with the old fastq channel and creat a output channel that the tools expect
 
     if (params.run_nanolyse) {
         ch_fastq
