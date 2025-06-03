@@ -29,7 +29,6 @@ process NANOPLOT {
         $args \\
         --store \\
         --raw \\
-        --tsv_stats \\
         -t $task.cpus \\
         -p $meta.id \\
         --tsv_stats \\
