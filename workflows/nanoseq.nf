@@ -143,6 +143,7 @@ include { RNA_FUSIONS_JAFFAL               } from '../subworkflows/local/rna_fus
  */
 include { NANOLYSE                    } from '../modules/nf-core/nanolyse/main'
 include { SEQTK_SAMPLE                } from '../modules/nf-core/seqtk/main'
+include { RESTRANDER                   } from '../modules/local/restrander'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
@@ -256,11 +257,52 @@ workflow NANOSEQ{
          * MODULE: DNA contaminant removal using NanoLyse
          */
         NANOLYSE ( ch_fastq_nanolyse, ch_nanolyse_fasta )
+
         NANOLYSE.out.fastq
             .join( ch_sample )
             .map { it -> [ it[0], it[1], it[3], it[4], it[5], it[6] ]}
             .set { ch_fastq }
         ch_software_versions = ch_software_versions.mix(NANOLYSE.out.versions.first().ifEmpty(null))
+    }
+
+    // If cDNA then we must run restrander and merge it back with samples
+        // that restrander cant run on and then bubble dowstream
+
+        /*
+            1. We know these are cDNA or direct RNA lets use a branch call to seperate into:
+
+                a. direct RNA where nothing is done
+                b. cDNA but there is no json config where nothing is done
+                c. cDNA with json config where we run restrander
+
+
+        */
+
+    if (params.protocol == 'cDNA'){
+        ch_fastq.branch{
+            config_provided: it[0].restrander_config != null && it[0].restrander_config != ''
+            no_config: it[0].restrander_config == null || it[0].restrander_config == ''
+        }.set { ch_fastq_branch }
+
+        ch_fastq_branch.config_provided.map { it -> [ it[0], it[1], it[0].restrander_config] }
+            .set { ch_fastq_restrander }
+
+        RESTRANDER ( ch_fastq_restrander )
+
+        // merge restrander fq back with the tuples before restander
+        // pluck out old fastqs
+        // merge it back with non-restrandered fastqs
+
+        RESTRANDER.out.reads
+            .join(ch_fastq_branch.config_provided)
+            .flatten()
+            .map { it -> [ it[0], it[1], it[3], it[4], it[5], it[6] ] }
+            .set { ch_fastq_restrandered }
+
+        ch_fastq_restrandered.mix(ch_fastq_branch.no_config).set { ch_fastq }
+
+        // Also mix in versions and bubble up metrics to somewhere useful
+
     }
 
     ch_fastqc_multiqc = Channel.empty()
@@ -387,6 +429,9 @@ workflow NANOSEQ{
         //  MULTIPLE_CONDITIONS = ch_sample.map { it -> it[0].split('_')[0..-2].join('_') }.unique().count().val > 1
 
         ch_r_version = Channel.empty()
+
+
+
         if (params.quantification_method == 'bambu') {
             ch_sample
                 .map { it -> [ it[2], it[3] ]}
