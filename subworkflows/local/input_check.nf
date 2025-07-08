@@ -30,6 +30,10 @@ def get_sample_info(LinkedHashMap sample, LinkedHashMap genomeMap) {
     def meta = [:]
     meta.id  = sample.sample
 
+    if(sample.restrander_config && sample.restrander_config != '') {
+        meta.restrander_config = sample.restrander_config
+    }
+
     // Resolve fasta and gtf file if using iGenomes
     def fasta = false
     def gtf   = false
