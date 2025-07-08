@@ -279,8 +279,6 @@ workflow NANOSEQ{
         */
 
 
-
-    ch_fastq.view { "ch_fastq is: ${it}" }
     if (params.protocol == 'cDNA'){
 
 
@@ -289,7 +287,7 @@ workflow NANOSEQ{
             no_config: it[0].restrander_config == null || it[0].restrander_config == ''
         }.set { ch_fastq_branch }
 
-        ch_fastq_branch.view{ "branch is: ${it}"}
+        ch_fastq_branch.view()
 
         ch_fastq_branch.config_provided.map { it -> [ it[0], it[1], it[0].restrander_config] }
             .set { ch_fastq_restrander }
