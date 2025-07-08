@@ -196,6 +196,10 @@ workflow NANOSEQ{
     INPUT_CHECK ( ch_input, ch_input_path )
         .set { ch_sample }
 
+    ch_sample.view{"Sample $it"}
+
+
+
     if (!params.skip_demultiplexing) {
 
         /*
@@ -287,9 +291,6 @@ workflow NANOSEQ{
             no_config: it[0].restrander_config == null || it[0].restrander_config == ''
         }.set { ch_fastq_branch }
 
-        ch_fastq_branch.config_provided.view{"Config provided: ${it}"}
-
-        ch_fastq_branch.no_config.view{"No config provided: ${it}"}
 
         ch_fastq_branch.config_provided.map { it -> [ it[0], it[1], it[0].restrander_config] }
             .set { ch_fastq_restrander }
