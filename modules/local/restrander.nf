@@ -16,12 +16,12 @@ process RESTRANDER {
     when:
     task.ext.when == null || task.ext.when
 
+
+    def prefix = task.ext.prefix ?: "${meta.id}"
     // _restrander-unknowns.fq.gz
 
     script:
     """
-    prefix=\${task.ext.prefix:-${meta.id}}
-
     /restrander \\
         ${reads} \\
         \${prefix}_restrander.fq.gz \\
