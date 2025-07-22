@@ -2,7 +2,6 @@ process RESTRANDER {
     tag "$meta.id"
     label 'process_medium'
 
-
     container "${'912684371407.dkr.ecr.us-west-2.amazonaws.com/restrander:1.0'}"
 
     input:
@@ -17,16 +16,16 @@ process RESTRANDER {
     when:
     task.ext.when == null || task.ext.when
 
-    def prefix = task.ext.prefix ?: "${meta.id}"
-
     // _restrander-unknowns.fq.gz
 
     script:
     """
+    prefix=\${task.ext.prefix:-${meta.id}}
+
     /restrander \\
         ${reads} \\
-        ${prefix}_restrander.fq.gz \\
-        ${input_config} > ${prefix}.restrander.json
+        \${prefix}_restrander.fq.gz \\
+        ${input_config} > \${prefix}.restrander.json
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
