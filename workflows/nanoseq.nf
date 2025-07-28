@@ -190,6 +190,8 @@ workflow NANOSEQ{
      */
     ch_software_versions = Channel.empty()
 
+    ch_input.view{"Input file: $it"}
+
     /*
      * SUBWORKFLOW: Read in samplesheet, validate and stage input files
      */
