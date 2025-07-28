@@ -304,11 +304,16 @@ workflow NANOSEQ{
         // pluck out old fastqs
         // merge it back with non-restrandered fastqs
 
+        ch_fastq_branch.config_provided.view { "FASTQ branch: $it" }
+
         RESTRANDER.out.reads
             .join(ch_fastq_branch.config_provided)
             .flatten()
             .map { it -> [ it[0], it[1], it[3], it[4], it[5], it[6] ] }
             .set { ch_fastq_restrandered }
+
+        // TODO: remove this
+        ch_fastq_restrandered.view { "Restrandered FASTQ: $it" }
 
         ch_fastq_restrandered.mix(ch_fastq_branch.no_config).set { ch_fastq }
 
