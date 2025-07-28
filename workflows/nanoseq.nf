@@ -319,7 +319,7 @@ workflow NANOSEQ{
     ch_fastqc_multiqc = Channel.empty()
     if (!params.skip_qc) {
 
-        ch_fastq.view{"Sample $it"}
+        ch_fastq.view{"fastq $it"}
 
         /*
          * SUBWORKFLOW: Fastq QC with Nanoplot and fastqc
