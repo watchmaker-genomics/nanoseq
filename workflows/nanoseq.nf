@@ -284,42 +284,42 @@ workflow NANOSEQ{
         */
 
 
-    if (params.protocol == 'cDNA'){
+if (params.protocol == 'cDNA'){
 
+    ch_fastq.branch{
+        config_provided: it[0].restrander_config != null && it[0].restrander_config != ''
+        no_config: it[0].restrander_config == null || it[0].restrander_config == ''
+    }.set { ch_fastq_branch }
 
-        ch_fastq.branch{
-            config_provided: it[0].restrander_config != null && it[0].restrander_config != ''
-            no_config: it[0].restrander_config == null || it[0].restrander_config == ''
-        }.set { ch_fastq_branch }
+    ch_fastq_branch.config_provided
+        .map { it -> [ it[0], it[1], it[0].restrander_config] }
+        .set { ch_fastq_restrander }
 
+    RESTRANDER ( ch_fastq_restrander )
 
-        ch_fastq_branch.config_provided.map { it -> [ it[0], it[1], it[0].restrander_config] }
-            .set { ch_fastq_restrander }
-
-
-
-        RESTRANDER ( ch_fastq_restrander )
-
-        // merge restrander fq back with the tuples before restander
-        // pluck out old fastqs
-        // merge it back with non-restrandered fastqs
-
-        ch_fastq_branch.config_provided.view { "FASTQ branch: $it" }
-
-        RESTRANDER.out.reads
-            .join(ch_fastq_branch.config_provided)
-            .flatten()
-            .map { it -> [ it[0], it[1], it[3], it[4], it[5], it[6] ] }
-            .set { ch_fastq_restrandered }
-
-        // TODO: remove this
-        ch_fastq_restrandered.view { "Restrandered FASTQ: $it" }
-
-        ch_fastq_restrandered.mix(ch_fastq_branch.no_config).set { ch_fastq }
-
-        // Also mix in versions and bubble up metrics to somewhere useful
-
+    RESTRANDER.out.reads
+        .join(ch_fastq_branch.config_provided, by: 0)
+        .map { tuple -> 
+        println "=== DEBUGGING TUPLE STRUCTURE ==="
+        println "Tuple size: ${tuple.size()}"
+        tuple.eachWithIndex { item, index ->
+            println "  tuple[$index] = $item (${item.getClass().getSimpleName()})"
+        }
+        println "================================="
+        
+        def meta = tuple[0]
+        def restranded_files = tuple[1]
+        def main_restranded_file = restranded_files[1]
+        
+        def gtf_file = tuple[6].toString().split(';')[1]  // Extract GTF from combined string
+        [ meta, main_restranded_file, tuple[3], gtf_file, tuple[4], tuple[5], tuple[6] ]
     }
+    .view { "After RESTRANDER processing: $it" }
+    .mix(ch_fastq_branch.no_config)
+    .set { ch_fastq }
+
+    ch_software_versions = ch_software_versions.mix(RESTRANDER.out.versions.first().ifEmpty(null))
+}
 
     ch_fastqc_multiqc = Channel.empty()
     if (!params.skip_qc) {
