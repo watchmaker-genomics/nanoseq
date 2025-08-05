@@ -8,15 +8,12 @@ process RESTRANDER {
     tuple val(meta), path(reads), path(input_config)
 
     output:
-    tuple val(meta), path("*_restrander.fq.gz"), emit: reads
-    // tuple val(meta), path("*_restrander-unknowns.fq.gz"), emit: unknown_reads
-    tuple val(meta), path("*.restrander.json"), emit: metrics
-    path "versions.yml"                , emit: versions
+    tuple val(meta), path("*_restrander.fq.gz") , emit: reads
+    tuple val(meta), path("*.restrander.json")  , emit: metrics
+    path "versions.yml"                         , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
-
-    // _restrander-unknowns.fq.gz
 
     script:
     def prefix = task.ext.prefix ?: reads.getBaseName()

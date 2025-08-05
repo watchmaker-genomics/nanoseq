@@ -270,51 +270,35 @@ workflow NANOSEQ{
         ch_software_versions = ch_software_versions.mix(NANOLYSE.out.versions.first().ifEmpty(null))
     }
 
-    // If cDNA then we must run restrander and merge it back with samples
-        // that restrander cant run on and then bubble dowstream
-
-        /*
-            1. We know these are cDNA or direct RNA lets use a branch call to seperate into:
-
-                a. direct RNA where nothing is done
-                b. cDNA but there is no json config where nothing is done
-                c. cDNA with json config where we run restrander
-
-
-        */
-
-
 if (params.protocol == 'cDNA'){
 
+    // split the fastq channel into two branches - samples with and without restrander_config
     ch_fastq.branch{
         config_provided: it[0].restrander_config != null && it[0].restrander_config != ''
         no_config: it[0].restrander_config == null || it[0].restrander_config == ''
     }.set { ch_fastq_branch }
 
+    // only run Restrander on the branch with config provided
     ch_fastq_branch.config_provided
         .map { it -> [ it[0], it[1], it[0].restrander_config] }
         .set { ch_fastq_restrander }
 
+    /*
+     * MODULE: Orientate and quality check cDNA reads with Restrander
+     */
     RESTRANDER ( ch_fastq_restrander )
 
     RESTRANDER.out.reads
         .join(ch_fastq_branch.config_provided, by: 0)
-        .map { tuple -> 
-        println "=== DEBUGGING TUPLE STRUCTURE ==="
-        println "Tuple size: ${tuple.size()}"
-        tuple.eachWithIndex { item, index ->
-            println "  tuple[$index] = $item (${item.getClass().getSimpleName()})"
-        }
-        println "================================="
-        
+        .map { tuple ->
         def meta = tuple[0]
         def restranded_files = tuple[1]
         def main_restranded_file = restranded_files[1]
-        
+
         def gtf_file = tuple[6].toString().split(';')[1]  // Extract GTF from combined string
         [ meta, main_restranded_file, tuple[3], gtf_file, tuple[4], tuple[5], tuple[6] ]
     }
-    .view { "After RESTRANDER processing: $it" }
+    // merge the restranded files with the rest of the fastq files
     .mix(ch_fastq_branch.no_config)
     .set { ch_fastq }
 
