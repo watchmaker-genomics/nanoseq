@@ -113,6 +113,7 @@ include { BAM_RENAME            } from '../modules/local/bam_rename'
 include { BAMBU                 } from '../modules/local/bambu'
 include { RSEQC_GENEBODYCOVERAGE} from '../modules/local/rseqc_genebodycoverage'
 include { MULTIQC               } from '../modules/local/multiqc'
+include { RESTRANDER            } from '../modules/local/restrander'
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -143,7 +144,6 @@ include { RNA_FUSIONS_JAFFAL               } from '../subworkflows/local/rna_fus
  */
 include { NANOLYSE                    } from '../modules/nf-core/nanolyse/main'
 include { SEQTK_SAMPLE                } from '../modules/nf-core/seqtk/main'
-include { RESTRANDER                   } from '../modules/local/restrander'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
