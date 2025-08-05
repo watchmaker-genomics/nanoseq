@@ -196,11 +196,6 @@ workflow NANOSEQ{
     INPUT_CHECK ( ch_input, ch_input_path )
         .set { ch_sample }
 
-    // TODO: must remove line below
-    ch_sample.view{"Sample $it"}
-
-
-
     if (!params.skip_demultiplexing) {
 
         /*
@@ -307,8 +302,6 @@ if (params.protocol == 'cDNA'){
 
     ch_fastqc_multiqc = Channel.empty()
     if (!params.skip_qc) {
-
-        ch_fastq.view{"fastq $it"}
 
         /*
          * SUBWORKFLOW: Fastq QC with Nanoplot and fastqc
