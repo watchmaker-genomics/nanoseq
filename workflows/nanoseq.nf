@@ -265,40 +265,49 @@ workflow NANOSEQ{
         ch_software_versions = ch_software_versions.mix(NANOLYSE.out.versions.first().ifEmpty(null))
     }
 
-if (params.protocol == 'cDNA'){
+    if (params.protocol == 'cDNA'){
 
-    // split the fastq channel into two branches - samples with and without restrander_config
-    ch_fastq.branch{
-        config_provided: it[0].restrander_config != null && it[0].restrander_config != ''
-        no_config: it[0].restrander_config == null || it[0].restrander_config == ''
-    }.set { ch_fastq_branch }
+        // split the fastq channel into two branches - samples with and without restrander_config
+        ch_fastq.branch{
+            config_provided: it[0].restrander_config != null && it[0].restrander_config != ''
+            no_config: it[0].restrander_config == null || it[0].restrander_config == ''
+        }.set { ch_fastq_branch }
 
-    // only run Restrander on the branch with config provided
-    ch_fastq_branch.config_provided
-        .map { it -> [ it[0], it[1], it[0].restrander_config] }
-        .set { ch_fastq_restrander }
+        // only run Restrander on the branch with config provided
+        ch_fastq_branch.config_provided
+            .map { it -> [ it[0], it[1], it[0].restrander_config] }
+            .set { ch_fastq_restrander }
 
-    /*
-     * MODULE: Orientate and quality check cDNA reads with Restrander
-     */
-    RESTRANDER ( ch_fastq_restrander )
+        /*
+        * MODULE: Orientate and quality check cDNA reads with Restrander
+        */
+        RESTRANDER ( ch_fastq_restrander )
 
-    RESTRANDER.out.reads
-        .join(ch_fastq_branch.config_provided, by: 0)
-        .map { tuple ->
-        def meta = tuple[0]
-        def restranded_files = tuple[1]
-        def main_restranded_file = restranded_files[1]
+        RESTRANDER.out.reads
+            .join(ch_fastq_branch.config_provided, by: 0)
+            .map { tuple ->
+            def meta = tuple[0]
+            def restranded_files = tuple[1]
+            def main_restranded_file = restranded_files[1]
 
-        def gtf_file = tuple[6].toString().split(';')[1]  // Extract GTF from combined string
-        [ meta, main_restranded_file, tuple[3], gtf_file, tuple[4], tuple[5], tuple[6] ]
+
+            [ meta, main_restranded_file, tuple[3], tuple[4], tuple[5], tuple[6] ]
+        }
+        // merge the restranded files with the rest of the fastq files
+        .mix(ch_fastq_branch.no_config)
+        .set { ch_fastq }
+
+        ch_software_versions = ch_software_versions.mix(RESTRANDER.out.versions.first().ifEmpty(null))
     }
-    // merge the restranded files with the rest of the fastq files
-    .mix(ch_fastq_branch.no_config)
-    .set { ch_fastq }
+    ch_fastq.view()
 
-    ch_software_versions = ch_software_versions.mix(RESTRANDER.out.versions.first().ifEmpty(null))
-}
+
+    def gtf_file = ch_fastq[6].toString().split(';')[1]  // Extract GTF from combined string
+    ch_fastq
+        .map { it -> [ it[0], it[1], it[2], gtf_file, it[3], it[4], it[5], it[6] ] }
+        .set { ch_fastq }
+
+    ch_fastq.view()
 
     ch_fastqc_multiqc = Channel.empty()
     if (!params.skip_qc) {
@@ -314,7 +323,7 @@ if (params.protocol == 'cDNA'){
     ch_samtools_multiqc = Channel.empty()
     if (!params.skip_alignment) {
 
-        ch_fastq.view()
+        //ch_fastq.view()
 
         /*
          * SUBWORKFLOW: Make chromosome size file and covert GTF to BED12
