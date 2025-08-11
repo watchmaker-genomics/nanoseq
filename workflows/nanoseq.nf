@@ -314,6 +314,8 @@ if (params.protocol == 'cDNA'){
     ch_samtools_multiqc = Channel.empty()
     if (!params.skip_alignment) {
 
+        ch_fastq.view()
+
         /*
          * SUBWORKFLOW: Make chromosome size file and covert GTF to BED12
          */
