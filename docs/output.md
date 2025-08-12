@@ -46,6 +46,23 @@ _Documentation_:
 _Description_:
 If you would like to run NanoLyse on the raw FASTQ files you can provide `--run_nanolyse` when running the pipeline. By default, the pipeline will filter lambda phage reads. However, you can provide your own FASTA file of "contaminants" with `--nanolyse_fasta`. The filtered FASTQ files will contain raw reads without the specified reference sequences (default: lambda phage sequences).
 
+## cDNA Read Orientation
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `restrander/<SAMPLE>_restrander.fq.gz`: FASTQ file of the stranded reads. The reverse strand reads are replaced with their reverse-complements, ensuring that all reads in the output have the same orientation as the original transcripts.
+- `restrander/<SAMPLE>-unknowns.*_restrander.fq.gz`: FASTQ file of the reads whose strand could not be inferred.
+- `restrander/<SAMPLE>.restrander.json`: Restrander output statistics - includes artefact and strand statistics.
+
+</details>
+
+_Documentation_:
+[Restrander](https://github.com/mritchielab/restrander)
+
+_Description_:
+Restrander is a program designed for orienting and quality-checking cDNA sequencing reads. Restrander will run automatically if the protocol is cDNA and a Restrander config file is present in the sample sheet.
+
 ## Read QC
 
 <details markdown="1">
