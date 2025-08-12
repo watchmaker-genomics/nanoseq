@@ -302,8 +302,8 @@ workflow NANOSEQ{
     ch_fastq.view()
 
     ch_fastq
-        .map { it -> [ it[0], it[1], it[2], it[6].toString().split(';')[1], // Extract GTF from combined string
-         it[3], it[4], it[5], it[6] ] }
+        .map { it -> [ it[0], it[1], it[2], it[5].toString().split(';')[1], // Extract GTF from combined string
+         it[3], it[4], it[5] ] }
         .set { ch_fastq }
 
     ch_fastq.view()
