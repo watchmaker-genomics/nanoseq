@@ -299,14 +299,12 @@ workflow NANOSEQ{
 
         ch_software_versions = ch_software_versions.mix(RESTRANDER.out.versions.first().ifEmpty(null))
     }
-    ch_fastq.view()
 
+    // Extract the GTF file from combined string, add it as own element in the channel
     ch_fastq
-        .map { it -> [ it[0], it[1], it[2], it[5].toString().split(';')[1], // Extract GTF from combined string
+        .map { it -> [ it[0], it[1], it[2], it[5].toString().split(';')[1],
          it[3], it[4], it[5] ] }
         .set { ch_fastq }
-
-    ch_fastq.view()
 
     ch_fastqc_multiqc = Channel.empty()
     if (!params.skip_qc) {
@@ -321,8 +319,6 @@ workflow NANOSEQ{
 
     ch_samtools_multiqc = Channel.empty()
     if (!params.skip_alignment) {
-
-        //ch_fastq.view()
 
         /*
          * SUBWORKFLOW: Make chromosome size file and covert GTF to BED12
