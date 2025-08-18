@@ -27,7 +27,6 @@ workflow INPUT_CHECK {
 // Function to resolve fasta and gtf file if using iGenomes
 // Returns [ sample, input_file, barcode, fasta, gtf, is_transcripts, annotation_str, nanopolish_fast5 ]
 def get_sample_info(LinkedHashMap sample, LinkedHashMap genomeMap) {
-    print(sample)
     def meta = [:]
     meta.id  = sample.sample
     meta.restrander_config = sample.restrander_config
