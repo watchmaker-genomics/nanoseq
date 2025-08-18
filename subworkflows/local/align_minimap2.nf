@@ -21,8 +21,8 @@ workflow ALIGN_MINIMAP2 {
     ch_index
         .cross(ch_fastq) { it -> it[-1] }
         .flatten()
-        .collate(13)
-        .map { it -> [ it[7], it[8], it[0], it[1], it[2], it[3], it[4], it[5] ] } // [ sample, fastq, fasta, sizes, gtf, bed, is_transcripts, index ]
+        .collate(14)
+        .map { it -> [ it[7], it[8], it[0], it[1], it[2], it[3], it[4], it[5] ] } // [ meta, fastq, fasta, sizes, gtf, bed, is_transcripts, index ]
         .set { ch_index }
 
     /*
