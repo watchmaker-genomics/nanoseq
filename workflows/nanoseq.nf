@@ -414,11 +414,11 @@ workflow NANOSEQ{
             ch_featurecounts_transcript_multiqc = QUANTIFY_STRINGTIE_FEATURECOUNTS.out.featurecounts_transcript_multiqc.ifEmpty([])
         }
 
-        RSEQC_GENEBODYCOVERAGE (
-            ch_view_sortbam
-                .join( BEDTOOLS_UCSC_BIGBED.out.ch_bed12 )
-                .map { it -> [ it[3], it[4], it[6] ] }
-            )
+        // RSEQC_GENEBODYCOVERAGE (
+        //     ch_view_sortbam
+        //         .join( BEDTOOLS_UCSC_BIGBED.out.ch_bed12 )
+        //         .map { it -> [ it[3], it[4], it[6] ] }
+        //     )
 
         if (!params.skip_differential_analysis) {
 
