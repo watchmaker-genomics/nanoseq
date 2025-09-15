@@ -113,7 +113,6 @@ include { BAM_RENAME            } from '../modules/local/bam_rename'
 include { BAMBU                 } from '../modules/local/bambu'
 include { RSEQC_GENEBODYCOVERAGE} from '../modules/local/rseqc_genebodycoverage'
 include { MULTIQC               } from '../modules/local/multiqc'
-include { RESTRANDER            } from '../modules/local/restrander'
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -257,54 +256,12 @@ workflow NANOSEQ{
          * MODULE: DNA contaminant removal using NanoLyse
          */
         NANOLYSE ( ch_fastq_nanolyse, ch_nanolyse_fasta )
-
         NANOLYSE.out.fastq
             .join( ch_sample )
             .map { it -> [ it[0], it[1], it[3], it[4], it[5], it[6] ]}
             .set { ch_fastq }
         ch_software_versions = ch_software_versions.mix(NANOLYSE.out.versions.first().ifEmpty(null))
     }
-
-    if (params.protocol == 'cDNA'){
-
-        // split the fastq channel into two branches - samples with and without restrander_config
-        ch_fastq.branch{
-            config_provided: it[0].restrander_config != null && it[0].restrander_config != ''
-            no_config: it[0].restrander_config == null || it[0].restrander_config == ''
-        }.set { ch_fastq_branch }
-
-        // only run Restrander on the branch with config provided
-        ch_fastq_branch.config_provided
-            .map { it -> [ it[0], it[1], it[0].restrander_config] }
-            .set { ch_fastq_restrander }
-
-        /*
-        * MODULE: Orientate and quality check cDNA reads with Restrander
-        */
-        RESTRANDER ( ch_fastq_restrander )
-
-        RESTRANDER.out.reads
-            .join(ch_fastq_branch.config_provided, by: 0)
-            .map { tuple ->
-            def meta = tuple[0]
-            def restranded_files = tuple[1]
-            def main_restranded_file = restranded_files[1]
-
-
-            [ meta, main_restranded_file, tuple[3], tuple[4], tuple[5], tuple[6] ]
-        }
-        // merge the restranded files with the rest of the fastq files
-        .mix(ch_fastq_branch.no_config)
-        .set { ch_fastq }
-
-        ch_software_versions = ch_software_versions.mix(RESTRANDER.out.versions.first().ifEmpty(null))
-    }
-
-    // Extract the GTF file from combined string, add it as own element in the channel
-    ch_fastq
-        .map { it -> [ it[0], it[1], it[2], it[5].toString().split(';')[1],
-         it[3], it[4], it[5] ] }
-        .set { ch_fastq }
 
     ch_fastqc_multiqc = Channel.empty()
     if (!params.skip_qc) {
@@ -430,9 +387,6 @@ workflow NANOSEQ{
         //  MULTIPLE_CONDITIONS = ch_sample.map { it -> it[0].split('_')[0..-2].join('_') }.unique().count().val > 1
 
         ch_r_version = Channel.empty()
-
-
-
         if (params.quantification_method == 'bambu') {
             ch_sample
                 .map { it -> [ it[2], it[3] ]}

@@ -10,13 +10,12 @@ You will need to create a file with information about the samples in your experi
 
 | Column       | Description                                                                                                                                                                                                                                                                               |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `group`             | Group identifier for sample. This will be identical for replicate samples from the same experimental group.                                                                                                                                                                               |
-| `replicate`         | Integer representing replicate number. Must start from `1..<number of replicates>`.                                                                                                                                                                                                       |
-| `barcode`           | Barcode identifier attributed to that sample during multiplexing. Must be an integer.                                                                                                                                                                                                     |
-| `input_file`        | Full path to FastQ file if previously demultiplexed, BAM file if previously aligned, or a path to a directory with subdirectories containing fastq or fast5 files. FastQ file has to be zipped and have the extension ".fastq.gz" or ".fq.gz". BAM file has to have the extension ".bam". |
-| `fasta`             | Genome fasta file or transcriptome fasta file for alignment. This can either be a local path, or the appropriate key for a genome available in [iGenomes config file](../conf/igenomes.config). Must have the extension ".fasta", ".fasta.gz", ".fa" or ".fa.gz".                         |
-| `gtf`               | Annotation gtf file for transcript discovery and quantification and RNA modification detection. This can either be blank or a local path. Must have the extension ".gtf".                                                                                                                 |
-| `restrander_config` | Restrander .json config file that provides the template-switching oligo (TSO) and reverse transcription primer (RTP) sequences. Different configurations are used for different library preparation protocols. This can either be blank or a file path. If blank, Restrander will not run for the sample.                               |
+| `group`      | Group identifier for sample. This will be identical for replicate samples from the same experimental group.                                                                                                                                                                               |
+| `replicate`  | Integer representing replicate number. Must start from `1..<number of replicates>`.                                                                                                                                                                                                       |
+| `barcode`    | Barcode identifier attributed to that sample during multiplexing. Must be an integer.                                                                                                                                                                                                     |
+| `input_file` | Full path to FastQ file if previously demultiplexed, BAM file if previously aligned, or a path to a directory with subdirectories containing fastq or fast5 files. FastQ file has to be zipped and have the extension ".fastq.gz" or ".fq.gz". BAM file has to have the extension ".bam". |
+| `fasta`      | Genome fasta file or transcriptome fasta file for alignment. This can either be a local path, or the appropriate key for a genome available in [iGenomes config file](../conf/igenomes.config). Must have the extension ".fasta", ".fasta.gz", ".fa" or ".fa.gz".                         |
+| `gtf`        | Annotation gtf file for transcript discovery and quantification and RNA modification detection. This can either be blank or a local path. Must have the extension ".gtf".                                                                                                                 |
 
 ### Skip demultiplexing
 
@@ -27,13 +26,13 @@ As shown in the examples below, the accepted samplesheet format is different dep
 ##### Example `samplesheet.csv` for non-demultiplexed fastq inputs
 
 ```bash
-group,replicate,barcode,input_file,fasta,gtf,restrander_config
-WT_MOUSE,1,1,,mm10,,
-WT_HUMAN,1,2,,hg19,,
-WT_POMBE,1,3,,/path/to/local/genome.fa,,
-WT_DENOVO,1,4,,,/path/to/local/transcriptome.fa,
-WT_LOCAL,2,5,,/path/to/local/genome.fa,/path/to/local/transcriptome.gtf,
-WT_UNKNOWN,3,6,,,,
+group,replicate,barcode,input_file,fasta,gtf
+WT_MOUSE,1,1,,mm10,
+WT_HUMAN,1,2,,hg19,
+WT_POMBE,1,3,,/path/to/local/genome.fa,
+WT_DENOVO,1,4,,,/path/to/local/transcriptome.fa
+WT_LOCAL,2,5,,/path/to/local/genome.fa,/path/to/local/transcriptome.gtf
+WT_UNKNOWN,3,6,,,
 ```
 
 ##### Example command for non-demultiplexed fastq inputs
@@ -53,11 +52,11 @@ nextflow run nf-core/nanoseq \
 ##### Example `samplesheet.csv` for demultiplexed fastq inputs
 
 ```bash
-group,replicate,barcode,input_file,fasta,gtf,restrander_config
-WT,1,,SAM101A1.fastq.gz,hg19,,
-WT,2,,SAM101A2.fastq.gz,hg19,,
-KO,1,,SAM101A3.fastq.gz,hg19,,
-KO,2,,SAM101A4.fastq.gz,hg19,,
+group,replicate,barcode,input_file,fasta,gtf
+WT,1,,SAM101A1.fastq.gz,hg19,
+WT,2,,SAM101A2.fastq.gz,hg19,
+KO,1,,SAM101A3.fastq.gz,hg19,
+KO,2,,SAM101A4.fastq.gz,hg19,
 ```
 
 ##### Example command for demultiplexed fastq inputs
@@ -75,11 +74,11 @@ nextflow run nf-core/nanoseq \
 ##### Example `samplesheet.csv` for BAM inputs
 
 ```bash
-group,replicate,barcode,input_file,fasta,gtf,restrander_config
-WT,1,,SAM101A1.bam,hg19,,
-WT,2,,SAM101A2.bam,hg19,,
-KO,1,,SAM101A3.bam,hg19,,
-KO,2,,SAM101A4.bam,hg19,,
+group,replicate,barcode,input_file,fasta,gtf
+WT,1,,SAM101A1.bam,hg19,
+WT,2,,SAM101A2.bam,hg19,
+KO,1,,SAM101A3.bam,hg19,
+KO,2,,SAM101A4.bam,hg19,
 ```
 
 ##### Example command for BAM inputs
@@ -98,11 +97,11 @@ nextflow run nf-core/nanoseq \
 ##### Example `samplesheet.csv` for FAST5 and FASTQ input directories
 
 ```bash
-group,replicate,barcode,input_file,fasta,gtf,restrander_config
-WT,1,,/full/path/to/SAM101A1/,hg19.fasta,hg19.gtf,
-WT,2,,/full/path/to/SAM101A2/,hg19.fasta,hg19.gtf,
-KO,1,,/full/path/to/SAM101A3/,hg19.fasta,hg19.gtf,
-KO,2,,/full/path/to/SAM101A4/,hg19.fasta,hg19.gtf,
+group,replicate,barcode,input_file,fasta,gtf
+WT,1,,/full/path/to/SAM101A1/,hg19.fasta,hg19.gtf
+WT,2,,/full/path/to/SAM101A2/,hg19.fasta,hg19.gtf
+KO,1,,/full/path/to/SAM101A3/,hg19.fasta,hg19.gtf
+KO,2,,/full/path/to/SAM101A4/,hg19.fasta,hg19.gtf
 ```
 
 ##### Each of the FAST5 and FASTQ input directory should have the following structure:
@@ -127,20 +126,6 @@ nextflow run nf-core/nanoseq \
     --protocol directRNA \
     --skip_demultiplexing \
     -profile <docker/singularity/institute>
-```
-
-### Using Restrander
-
-Restrander is a program used for orienting and quality-checking cDNA sequencing reads. Restrander will automatically run if the protocol is cDNA and a Restrander config file is present in the sample sheet. Examples of Restrander configuration files for several protocols can be found in the [README](https://github.com/jakob-schuster/restrander-vignette?tab=readme-ov-file#configuration-files) for the Restrander vignette. The sample sheet can have a mix of samples with and without Restrander config files.
-
-##### Example `samplesheet.csv` for using Restrander
-
-```bash
-group,replicate,barcode,input_file,fasta,gtf,restrander_config
-WT,1,1,/full/path/to/SAM101A1/,hg19,hg19.gtf,
-WT,2,2,/full/path/to/SAM101A2/,hg19,hg19.gtf,
-KO,1,3,/full/path/to/SAM101A3/,hg19,hg19.gtf,PCB109.json
-KO,2,4,/full/path/to/SAM101A4/,hg19,hg19.gtf,PCB109.json
 ```
 
 ## Running the pipeline
