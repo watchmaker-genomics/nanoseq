@@ -25,8 +25,6 @@ process SUBREAD_FEATURECOUNTS {
     """
     featureCounts \\
         -L \\
-        -O \\
-        -f \\
         -g gene_id \\
         -t exon \\
         -T $task.cpus \\
