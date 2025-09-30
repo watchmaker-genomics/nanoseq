@@ -11,3 +11,12 @@ report_section_order:
     order: -1002
 
 export_plots: true
+
+log_filesize_limit: 1000000000  # 1000MB limit
+fn_ignore_files:
+    - "*.log"
+
+# Module-specific settings
+samtools:
+    stats:
+        max_filesize: 1000000000  # 1000MB for stats files
