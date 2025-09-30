@@ -192,10 +192,7 @@ workflow NANOSEQ{
     /*
      * SUBWORKFLOW: Read in samplesheet, validate and stage input files
      */
-     if (params.dummy) {
-        print "yo momma"
-     }
-     
+
     INPUT_CHECK ( ch_input, ch_input_path )
         .set { ch_sample }
 
