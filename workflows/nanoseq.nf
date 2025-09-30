@@ -192,6 +192,10 @@ workflow NANOSEQ{
     /*
      * SUBWORKFLOW: Read in samplesheet, validate and stage input files
      */
+     if (params.dummy) {
+        print "yo momma"
+     }
+     
     INPUT_CHECK ( ch_input, ch_input_path )
         .set { ch_sample }
 
@@ -414,11 +418,14 @@ workflow NANOSEQ{
             ch_featurecounts_transcript_multiqc = QUANTIFY_STRINGTIE_FEATURECOUNTS.out.featurecounts_transcript_multiqc.ifEmpty([])
         }
 
-        RSEQC_GENEBODYCOVERAGE (
+        if (!params.skip_gene_body_coverage){
+            RSEQC_GENEBODYCOVERAGE (
             ch_view_sortbam
                 .join( BEDTOOLS_UCSC_BIGBED.out.ch_bed12 )
                 .map { it -> [ it[3], it[4], it[6] ] }
             )
+        }
+        
 
         if (!params.skip_differential_analysis) {
 
